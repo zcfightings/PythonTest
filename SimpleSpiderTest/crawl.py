@@ -5,7 +5,7 @@ import http.cookiejar
 import re
 
 
-user_agent = 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36'
+user_agent = 'Mozilla/5.0'
 headers = {'User-Agent':user_agent}
 try:
 
@@ -24,21 +24,25 @@ try:
     url = 'http://www.baidu.com'
 
     print('第一种方法')
-    response1 = urllib.request.urlopen(url)
+    response1 = request.urlopen(url)
     print(response1.getcode())
     print(len(response1.read()))
 
     print('第二种方法')
     req = request.Request(url)
     req.add_header('user-agent',user_agent)
-    response2 = urllib.request.urlopen(req)
-    print(response1.getcode())
-    print(len(response1.read()))
+    response2 = request.urlopen(req)
+    print(response2.getcode())
+    print(len(response2.read()))
 
+    print('第三种方法')
     cj = http.cookiejar.CookieJar()
-    opener = urllib.request.build_opener(cj)
-    print(response1.getcode())
-    print(len(response1.read()))
+    opener = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(cj))
+    request.install_opener(opener)
+    response3 = request.urlopen(url)
+    print(response3.getcode())
+    print(response3.read())
+
 
 
 
