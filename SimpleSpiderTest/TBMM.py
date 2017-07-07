@@ -143,23 +143,22 @@ class Spider:
             print(u"正在偷偷地保存", item[2], "的信息")
             print(u"又意外地发现她的个人地址是", 'http:'+item[0])
             # 个人详情页面的URL
-            detailURL ='http:'+item[0]
+            #detailURL ='http:'+item[0]
             # 得到个人详情页面代码
-            detailPage = self.getDetailPage(detailURL)
+            #detailPage = self.getDetailPage(detailURL)
             # 获取个人简介
-            brief = self.getBrief(detailPage)
+#            brief = self.getBrief(detailPage)
             # 获取所有图片列表
-            images = self.getAllImg(detailPage)
-            if images and isinstance(images,str):
-                print('开始保存。。。。。。。。。。。。。')
-                images = 'http:'+images
-                self.mkdir(item[2])
-                # 保存个人简介
-                self.saveBrief(brief, item[2])
-                # 保存头像
-                self.saveIcon('http:'+item[1], item[2])
+            #images = self.getAllImg(detailPage)
+            #if images and isinstance(images,str):
+            #images = 'http:'+images
+            self.mkdir(item[2])
+            # 保存个人简介
+#            self.saveBrief(brief, item[2])
+            # 保存头像
+            self.saveIcon('http:'+item[1], item[2])
                 # 保存图片
-                self.saveImgs(images, item[2])
+                #self.saveImgs(images, item[2])
 
     # 传入起止页码，获取MM图片
     def savePagesInfo(self, start, end):
