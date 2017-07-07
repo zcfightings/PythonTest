@@ -2,6 +2,7 @@ import urllib
 from urllib import request
 import re
 import os
+from bs4 import BeautifulSoup
 
 class UrlTool:
     removeImg = re.compile('<img.*?>| {7}|')
