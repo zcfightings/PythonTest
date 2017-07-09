@@ -2,5 +2,12 @@ import re
 import urllib
 from urllib import request
 
-url = "http://mm.taobao.com/631300490.htm"
-print(request.urlopen(url).read().decode('gbk'))
+url = r"""hello
+"""
+
+pattern = re.compile('<a target=\'_blank\' href=\'(.*?)\'>(.*?)</a></b></font><font size=',re.S)
+
+items = re.findall(pattern,url)
+for item in items :
+    print(item[0], item[1])
+

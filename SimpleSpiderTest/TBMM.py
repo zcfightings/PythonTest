@@ -5,7 +5,11 @@ import os
 from bs4 import BeautifulSoup
 
 class UrlTool:
+
+    pattern = pattern = re.compile(
+            '<a target=\'_blank\' href=\'(.*?)\'>(.*?)</a></b></font><font size=',re.S)
     removeImg = re.compile('<img.*?>| {7}|')
+
     removeAddr = re.compile('<a.*?>|</a>')
     replaceLine = re.compile('<tr>|<div>|</div>|</p>')
     replaceTd = re.compile('<td>')
