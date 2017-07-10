@@ -1,34 +1,41 @@
 from __future__ import unicode_literals
 import pandas as pd
+import matplotlib as mtl
 from matplotlib.dates import DateFormatter,WeekdayLocator,DayLocator,MONDAY, date2num
-from matplotlib.finance import candlestick_ohlc
+from matplotlib.finance import candlestick_ohlc,quotes_historical_yahoo_ohlc
 import matplotlib.pyplot as plt
 import numpy as np
+from datetime import datetime
 
 __author__ = 'zhaochen'
 
+"""
+基于python3的股票分析。数据请自行准备。
+"""
 
 def pandas_candlestick2_ohlc(dat,stick = "day", otherseries = None):
     mondays = WeekdayLocator(MONDAY)
     alldays = DayLocator()
     dayformater = DateFormatter('%d')
 
-    transdat = dat.loc[:,["open","high","low","close"]]
+    transdat = dat.loc[:,['date','open','high','low','close']]
     if type(stick) == str:
         if stick == "day":
             plotdat = transdat
+            plotdat['date'] = plotdat['date'].map(lambda x:mtl.dates.date2num(datetime.strptime(x,"%Y/%m/%d")))
         elif stick in ["week","month","year"]:
             if stick == "week":
-                transdat["week"] = pd.to_datetime(transdat.index).map(lambda x:x.isocalender()[1])
+                transdat["week"] = transdat['date'].map(lambda x: datetime.strptime(x,'%Y/%m/%d').isocalendar()[1])
             elif stick == "month":
-                transdat["month"] = pd.to_datetime(transdat.index).map(lambda x:x.month)
-            transdat["year"] = pd.to_datetime(transdat.index).map(lambda x:x.isocalender()[0])
+                transdat["month"] = transdat['date'].map(lambda x: datetime.strptime(x,'%Y/%m/%d').month)
+            transdat["year"] = transdat['date'].map(lambda x: datetime.strptime(x,'%Y/%m/%d').year)
             grouped = transdat.groupby(list(set(["year",stick])))
-            plotdat = pd.DataFrame({"open":[],"high":[],"low":[],"close":[]})
 
+            plotdat = pd.DataFrame({"date":[],"open":[],"high":[],"low":[],"close":[]})
             for name,group in grouped:
                 plotdat = plotdat.append(pd.DataFrame({
-                    "open":group.iloc[0,0],
+                    "date":group.index[0],
+                    "open":group.iloc[0,1],
                     "low":min(group.low),
                     "high":max(group.high),
                     "close":group.iloc[-1,3]
@@ -41,20 +48,21 @@ def pandas_candlestick2_ohlc(dat,stick = "day", otherseries = None):
             elif stick == "year":
                 stick = 365
     elif type(stick) == int and stick >= 1:
-        transdat["stick"] = [np.floor(i/stick) for i in range(len(transdat.index()))]
-        grouped = transdat.groupby("stick")
-        plotdat = pd.DataFrame({"Open": [], "High": [], "Low": [], "Close": []}) # Create empty data frame containing what will be plotted
-        for name, group in grouped:
-            plotdat = plotdat.append(pd.DataFrame({"Open": group.iloc[0,0],
-                                        "High": max(group.High),
-                                        "Low": min(group.Low),
-                                        "Close": group.iloc[-1,3]},
+        transdat["date"] = [np.floor(i/stick) for i in range(len(transdat))]
+        grouped = transdat.groupby("date")
+        plotdat = pd.DataFrame({"date":[],"open": [], "high": [], "low": [], "close": []})
+        for name,group in grouped:
+            plotdat = plotdat.append(pd.DataFrame({
+                                        "date": group.iloc[0,0],
+                                        "open": group.iloc[0,1],
+                                        "high": max(group.high),
+                                        "low": min(group.low),
+                                        "close": group.iloc[-1,3]},
                                         index = [group.index[0]]))
 
     else:
         raise ValueError('Valid inputs to argument "stick" include the strings "day", "week", "month", "year", or a positive integer')
 
-     # Set plot parameters, including the axis object ax used for plotting
     fig, ax = plt.subplots()
     fig.subplots_adjust(bottom=0.2)
     if plotdat.index[-1] - plotdat.index[0] < pd.Timedelta('730 days').days:
@@ -68,9 +76,10 @@ def pandas_candlestick2_ohlc(dat,stick = "day", otherseries = None):
     ax.grid(True)
 
     # Create the candelstick chart
-    candlestick_ohlc(ax, list(zip(list(date2num(plotdat.index.tolist())), plotdat["open"].tolist(), plotdat["high"].tolist(),
-                      plotdat["low"].tolist(), plotdat["close"].tolist())),
-                      colorup = "black", colordown = "red", width = stick * .4)
+    candlestick_ohlc(ax,
+                     (zip(plotdat['date'].tolist(), plotdat['open'].tolist(), plotdat['high'].tolist(),
+                     plotdat['low'].tolist(), plotdat['close'].tolist())),
+                      colorup ="blue", colordown = "red")
 
     # Plot other series (such as moving averages) as lines
     if otherseries != None:
@@ -81,12 +90,12 @@ def pandas_candlestick2_ohlc(dat,stick = "day", otherseries = None):
     ax.xaxis_date()
     ax.autoscale_view()
     plt.setp(plt.gca().get_xticklabels(), rotation=45, horizontalalignment='right')
-
+    plt.xlabel("date")
     plt.show()
 
 
-apple = pd.read_excel(r"C:\Users\zhaochen\Desktop\AAPL.xlsx")
-pandas_candlestick2_ohlc(apple)
+apple = pd.read_csv(r"C:\Users\bjzhaochen\Desktop\AAPL4.csv")
+pandas_candlestick2_ohlc(apple,"day")
 
 
 
